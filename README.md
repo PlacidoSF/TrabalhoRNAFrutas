@@ -1,8 +1,10 @@
-# RNA Frutas - Classificador de Frutas com MLP
+# RNA Frutas - Classificador de Frutas com MLP (Java)
 
-Este repositório contém a implementação de uma Rede Neural Multicamadas (MLP) construída totalmente do zero em Python.
+Este repositório contém a implementação de uma Rede Neural Multicamadas (MLP) desenvolvida do zero em Java.
 
-O projeto tem como objetivo principal demonstrar o funcionamento prático e matemático de uma rede neural artificial. A implementação foca em estruturar o algoritmo de retropropagação (Backpropagation) e o cálculo do gradiente descendente utilizando apenas a biblioteca NumPy, evitando o uso de frameworks de Machine Learning de alto nível. O modelo foi desenvolvido para aprender e classificar tipos de frutas com base em suas características numéricas.
+O objetivo do projeto é demonstrar a aplicação prática da lógica de redes neurais, especificamente o algoritmo de Backpropagation e a função de ativação Sigmoide, sem o uso de bibliotecas prontas de Machine Learning. O sistema foi projetado para aprender padrões e classificar diferentes tipos de frutas com base em atributos físicos.
+
+Nesta versão, foram implementados recursos como o controle de sementes para garantir a reprodutibilidade dos testes e a parada antecipada para otimizar o treinamento e evitar a memorização excessiva dos dados (overfitting).
 
 ## Autores
 * Plácido da Silva França
