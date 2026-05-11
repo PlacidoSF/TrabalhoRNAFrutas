@@ -20,43 +20,49 @@ public class GerenciarDados {
             {0.0}, {0.0}, {0.0}, {1.0}
     };
 
-    public GerenciarDados() {
-        embaralharDados();
+    // Atualização: Recebe a semente
+    public GerenciarDados(long seed) {
+        embaralharDados(seed);
     }
 
-    
-    private void embaralharDados() {
-        Random rnd = new Random();
-        for (int i = entradas.length - 1; i > 0; i--) {
-            int index = rnd.nextInt(i + 1);
+    private void embaralharDados(long seed) {
+        // Atualização: Usa a semente no gerador aleatório
+        Random rnd = new Random(seed);
+
+        int[] indicesFronteira = {5, 18, 19};
+
+        for (int i = 0; i < indicesFronteira.length; i++) {
+            int idxOriginal = indicesFronteira[i];
             
-            // troca as entradas
+            // Troca entradas
+            double[] tempE = entradas[i];
+            entradas[i] = entradas[idxOriginal];
+            entradas[idxOriginal] = tempE;
+            
+            // Troca saídas
+            double[] tempS = saidas[i];
+            saidas[i] = saidas[idxOriginal];
+            saidas[idxOriginal] = tempS;
+        }
+
+        // Embaralhamos o resto dos dados do índice 3 em diante
+        for (int i = entradas.length - 1; i > indicesFronteira.length; i--) {
+            int index = rnd.nextInt(i - indicesFronteira.length + 1) + indicesFronteira.length;
+            
             double[] tempEntrada = entradas[index];
             entradas[index] = entradas[i];
             entradas[i] = tempEntrada;
             
-            // troca as saídas
             double[] tempSaida = saidas[index];
             saidas[index] = saidas[i];
             saidas[i] = tempSaida;
         }
     }
 
-    public double[][] getEntradasTreino() {
-        return copiarFatia(entradas, 0, 14);
-    }
-
-    public double[][] getSaidasTreino() {
-        return copiarFatia(saidas, 0, 14);
-    }
-
-    public double[][] getEntradasTeste() {
-        return copiarFatia(entradas, 14, 20);
-    }
-
-    public double[][] getSaidasTeste() {
-        return copiarFatia(saidas, 14, 20);
-    }
+    public double[][] getEntradasTreino() { return copiarFatia(entradas, 0, 16); }
+    public double[][] getSaidasTreino() { return copiarFatia(saidas, 0, 16); }
+    public double[][] getEntradasTeste() { return copiarFatia(entradas, 16, 20); }
+    public double[][] getSaidasTeste() { return copiarFatia(saidas, 16, 20); }
 
     private double[][] copiarFatia(double[][] origem, int inicio, int fim) {
         int tamanho = fim - inicio;
