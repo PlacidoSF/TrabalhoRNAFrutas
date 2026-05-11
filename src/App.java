@@ -4,7 +4,6 @@ import dados.GerenciarDados;
 public class App {
     public static void main(String[] args) throws Exception {
         
-        // sementes para garantir a reprodutibilidade
         long seedDosDados = 70L;
         long seedDaRede = 40L;
 
@@ -20,7 +19,11 @@ public class App {
 
         RedeNeural rede = new RedeNeural(seedDaRede);
 
-        // dados de treinamento
+        System.out.println("---------------------------------------------");
+        System.out.printf("Arquitetura Detectada: [%d entradas, %d ocultos, %d saída]\n", 
+                          rede.getNumEntrada(), rede.getNumOculta(), rede.getNumSaida());
+        System.out.println("---------------------------------------------");
+
         rede.treinar(entradasTreino, saidasTreino, 20000, 0.2, 0.001);
 
         System.out.println("\n=============================================");

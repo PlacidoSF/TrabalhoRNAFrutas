@@ -5,7 +5,7 @@ import java.util.Random;
 public class RedeNeural {
 
     private int numEntrada = 2;
-    private int numOculta = 6;
+    private int numOculta = 3;
     private int numSaida = 1;
 
     private double[][] pesosOculta = new double[numEntrada][numOculta];
@@ -14,13 +14,25 @@ public class RedeNeural {
     private double[] biasSaida = new double[numSaida];
     double[] saidaOculta = new double[numOculta];
 
-    // Atualização: Construtor agora recebe a semente
+    
     public RedeNeural(long seed) {
         inicializarPesos(seed);
     }
 
+    public int getNumEntrada() {
+        return numEntrada;
+    }
+
+    public int getNumOculta() {
+        return numOculta;
+    }
+
+    public int getNumSaida() {
+        return numSaida;
+    }
+
     public void inicializarPesos(long seed) {
-        // Atualização: Usa a semente para congelar os pesos iniciais
+        
         Random random = new Random(seed);
 
         for (int i = 0; i < numEntrada; i++) {
@@ -41,8 +53,8 @@ public class RedeNeural {
         return 1 / (1 + Math.exp(-x));
     }
 
-    public double sigmoideDerivada(double x) {
-        return sigmoide(x) * (1 - sigmoide(x));
+    public double sigmoideDerivada(double saidaAtivada) {
+        return saidaAtivada * (1 - saidaAtivada);
     }
 
     public double feedforward(double[] entrada) {
@@ -68,7 +80,6 @@ public class RedeNeural {
         int epocaAtual = 0;
         double erroGlobal = 1.0;
 
-        // O laço já garante a parada pelo erro mínimo!
         while (epocaAtual < maxEpocas && erroGlobal > erroMinimo) {
             erroGlobal = 0;
 
@@ -80,11 +91,11 @@ public class RedeNeural {
                 double erroAmostra = saidaEsperada - saidaObtida;
                 erroGlobal += 0.5 * Math.pow(erroAmostra, 2);
 
-                double deltaSaida = erroAmostra * (saidaObtida * (1.0 - saidaObtida));
+                double deltaSaida = erroAmostra * sigmoideDerivada(saidaObtida);
 
                 double[] deltaOculta = new double[numOculta]; 
                 for (int j = 0; j < numOculta; j++) {
-                    deltaOculta[j] = (saidaOculta[j] * (1.0 - saidaOculta[j])) * (deltaSaida * pesosSaida[j][0]);
+                    deltaOculta[j] = sigmoideDerivada(saidaOculta[j]) * (deltaSaida * pesosSaida[j][0]);
                 }
 
                 for (int j = 0; j < numOculta; j++) {
@@ -110,7 +121,7 @@ public class RedeNeural {
             }
         }
         
-        // Atualização: Mensagem explícita de parada antecipada
+        
         if (erroGlobal <= erroMinimo) {
             System.out.println("---------------------------------------------");
             System.out.printf(">>> PARADA ANTECIPADA: A rede atingiu o erro alvo na época %d <<<\n", epocaAtual);

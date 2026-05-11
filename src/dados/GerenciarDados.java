@@ -19,14 +19,13 @@ public class GerenciarDados {
             {1.0}, {1.0}, {1.0}, {0.0},
             {0.0}, {0.0}, {0.0}, {1.0}
     };
-
-    // Atualização: Recebe a semente
+    
     public GerenciarDados(long seed) {
         embaralharDados(seed);
     }
 
     private void embaralharDados(long seed) {
-        // Atualização: Usa a semente no gerador aleatório
+    
         Random rnd = new Random(seed);
 
         int[] indicesFronteira = {5, 18, 19};
@@ -34,18 +33,15 @@ public class GerenciarDados {
         for (int i = 0; i < indicesFronteira.length; i++) {
             int idxOriginal = indicesFronteira[i];
             
-            // Troca entradas
             double[] tempE = entradas[i];
             entradas[i] = entradas[idxOriginal];
             entradas[idxOriginal] = tempE;
             
-            // Troca saídas
             double[] tempS = saidas[i];
             saidas[i] = saidas[idxOriginal];
             saidas[idxOriginal] = tempS;
         }
 
-        // Embaralhamos o resto dos dados do índice 3 em diante
         for (int i = entradas.length - 1; i > indicesFronteira.length; i--) {
             int index = rnd.nextInt(i - indicesFronteira.length + 1) + indicesFronteira.length;
             
