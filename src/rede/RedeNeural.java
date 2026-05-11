@@ -4,37 +4,36 @@ import java.util.Random;
 
 public class RedeNeural {
 
-    // 2 - 3 - 1 
-    private double[][] pesosOculta = new double[2][3];
-    private double[] biasOculta = new double[3];
+    private int numEntrada = 2;
+    private int numOculta = 6;
+    private int numSaida = 1;
 
-    private double[][] pesosSaida = new double[3][1];
-    private double[] biasSaida = new double[1];
+    private double[][] pesosOculta = new double[numEntrada][numOculta];
+    private double[] biasOculta = new double[numOculta];
+    private double[][] pesosSaida = new double[numOculta][numSaida];
+    private double[] biasSaida = new double[numSaida];
+    double[] saidaOculta = new double[numOculta];
 
-     double[] saidaOculta = new double[3];
-
-    public RedeNeural() {
-        inicializarPesos();
+    // Atualização: Construtor agora recebe a semente
+    public RedeNeural(long seed) {
+        inicializarPesos(seed);
     }
 
-    // -0.5 ~ 0.5
-    public void inicializarPesos() {
-        Random random = new Random();
+    public void inicializarPesos(long seed) {
+        // Atualização: Usa a semente para congelar os pesos iniciais
+        Random random = new Random(seed);
 
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 3; j++) {
+        for (int i = 0; i < numEntrada; i++) {
+            for (int j = 0; j < numOculta; j++) {
                 pesosOculta[i][j] = random.nextDouble() - 0.5;
             }
         }
-
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < numOculta; i++) {
             biasOculta[i] = random.nextDouble() - 0.5;
         }
-
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < numOculta; i++) {
             pesosSaida[i][0] = random.nextDouble() - 0.5;
         }
-
         biasSaida[0] = random.nextDouble() - 0.5;
     }
 
@@ -47,25 +46,17 @@ public class RedeNeural {
     }
 
     public double feedforward(double[] entrada) {
-
-        // entrada -> camada oculta
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < numOculta; i++) {
             double net = 0;
-
-            // soma ponderada
-            for (int j = 0; j < 2; j++) {
+            for (int j = 0; j < numEntrada; j++) {
                 net += entrada[j] * pesosOculta[j][i];
             }
-
             net += biasOculta[i];
-
-            // ativação
             saidaOculta[i] = sigmoide(net);
         }
 
-        // camada oculta -> camada de saída
         double net = 0;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < numOculta; i++) {
             net += saidaOculta[i] * pesosSaida[i][0];
         }
         net += biasSaida[0];
@@ -73,11 +64,11 @@ public class RedeNeural {
         return sigmoide(net);
     }
 
-
     public void treinar(double[][] entradas, double[][] saidasEsperadas, int maxEpocas, double taxaAprendizado, double erroMinimo) {
         int epocaAtual = 0;
         double erroGlobal = 1.0;
 
+        // O laço já garante a parada pelo erro mínimo!
         while (epocaAtual < maxEpocas && erroGlobal > erroMinimo) {
             erroGlobal = 0;
 
@@ -85,52 +76,46 @@ public class RedeNeural {
                 double[] entrada = entradas[i];
                 double saidaEsperada = saidasEsperadas[i][0];
 
-                // feedforward
                 double saidaObtida = feedforward(entrada);
-
-                // cálculo do erro
                 double erroAmostra = saidaEsperada - saidaObtida;
                 erroGlobal += 0.5 * Math.pow(erroAmostra, 2);
 
-                // backpropagation
-                double deltaSaida = erroAmostra * sigmoideDerivada(saidaObtida);
+                double deltaSaida = erroAmostra * (saidaObtida * (1.0 - saidaObtida));
 
-                double[] deltaOculta = new double[3];
-
-                for (int j = 0; j < 3; j++) {
-                    deltaOculta[j] = sigmoideDerivada(saidaOculta[j]) * deltaSaida * pesosSaida[j][0];
+                double[] deltaOculta = new double[numOculta]; 
+                for (int j = 0; j < numOculta; j++) {
+                    deltaOculta[j] = (saidaOculta[j] * (1.0 - saidaOculta[j])) * (deltaSaida * pesosSaida[j][0]);
                 }
 
-                // atualização dos pesos e bias da camada de saída
-                for (int j = 0; j < 3; j++) {
+                for (int j = 0; j < numOculta; j++) {
                     pesosSaida[j][0] += taxaAprendizado * deltaSaida * saidaOculta[j];
                 }
                 biasSaida[0] += taxaAprendizado * deltaSaida;
 
-
-                // atualização dos pesos e bias da camada oculta
-                for (int j = 0; j < 2; j++) {
-                    for (int k = 0; k < 3; k++) {
+                for (int j = 0; j < numEntrada; j++) { 
+                    for (int k = 0; k < numOculta; k++) { 
                         pesosOculta[j][k] += taxaAprendizado * deltaOculta[k] * entrada[j];
                     }
                 }
-
-                for (int j = 0; j < 3; j++) {
+                for (int j = 0; j < numOculta; j++) {
                     biasOculta[j] += taxaAprendizado * deltaOculta[j];
                 }
             }
 
-            // média do erro global
             erroGlobal /= entradas.length;
             epocaAtual++;
 
-
-            // situação a cada 100 épocas
-            if (epocaAtual % 100 == 0) {
-                System.out.println("Época: " + epocaAtual + " | Erro Global: " + String.format("%.6f", erroGlobal));
+            if (epocaAtual % 500 == 0) {
+                System.out.printf("Época: %d | Erro Médio: %.6f\n", epocaAtual, erroGlobal);
             }
         }
-
-        System.out.println("Treinamento finalizado em " + epocaAtual + " épocas com erro global: " + String.format("%.6f", erroGlobal));
+        
+        // Atualização: Mensagem explícita de parada antecipada
+        if (erroGlobal <= erroMinimo) {
+            System.out.println("---------------------------------------------");
+            System.out.printf(">>> PARADA ANTECIPADA: A rede atingiu o erro alvo na época %d <<<\n", epocaAtual);
+        }
+        
+        System.out.printf("Treino finalizado! Épocas rodadas: %d | Erro Final: %.6f\n", epocaAtual, erroGlobal);
     }
 }
